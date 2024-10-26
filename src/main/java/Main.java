@@ -34,14 +34,13 @@ public class Main {
     
       // serverSocket.accept(); // Wait for connection from client.
 
-      if(path.equals("/") || path == null){
-
-        clientSocket.getOutputStream().write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
-      }else{
-        clientSocket.getOutputStream().write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
-
-      }
-
+      // if(path.equals("/") || path == null){
+      //   clientSocket.getOutputStream().write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+      // }else{
+      //   clientSocket.getOutputStream().write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
+      // }
+      
+        clientSocket.getOutputStream().write("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {path.length}\r\n\r\n{path}\r\n".getBytes());
 
     } catch (IOException e) {
       System.out.println("IOException: " + e.getMessage());
