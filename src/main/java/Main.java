@@ -9,6 +9,9 @@ public class Main {
 
     // Uncomment this block to pass the first stage
     //
+
+    Socket clientSocket = null;
+
     try {
       ServerSocket serverSocket = new ServerSocket(4221);
     
@@ -17,7 +20,13 @@ public class Main {
       serverSocket.setReuseAddress(true);
     
       serverSocket.accept(); // Wait for connection from client.
+
+      clientSocket = serverSocket.accept(); // Wait for connection from client.
+
       System.out.println("accepted new connection");
+      
+      clientSocket.getOutputStream().write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+
     } catch (IOException e) {
       System.out.println("IOException: " + e.getMessage());
     }
