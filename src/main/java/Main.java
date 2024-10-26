@@ -29,8 +29,37 @@ public class Main {
 
       String requestLine = reader.readLine();
 
+      
+
       String[] parts = requestLine.split(" ");
-        String path = parts[1];
+      String path = parts[1];
+      String userAgent = null;
+      String response = "";
+
+      if (parts != null && parts.length > 0) {
+          int userAgentIndex = -1;
+          for (int i = 0; i < parts.length; i++) {
+              if (parts[i].equals("User-Agent:")) {
+                  userAgentIndex = i;
+                  break;
+              }
+          }
+          if (userAgentIndex != -1 && userAgentIndex + 1 < parts.length) {
+              userAgent = parts[userAgentIndex + 1];
+          }
+      }
+
+      if (userAgent != null) {
+          System.out.println("User-Agent: " + userAgent);
+          response = "HTTP/1.1 200 OK\r\n" +
+            "Content-Type: text/plain\r\n" +
+            "Content-Length: " + userAgent.length() + "\r\n\r\n" +
+            userAgent + "\r\n";
+      } else {
+          System.out.println("User-Agent header not found.");
+          clientSocket.getOutputStream().write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
+      }
+
         
 
         System.out.println("path: " + path);
@@ -38,7 +67,6 @@ public class Main {
 
         String[] pathArr = path.split("/");
 
-        String response = "";
 
         if(pathArr.length > 1){
           if(pathArr[1].equals("echo")){
@@ -51,26 +79,16 @@ public class Main {
             "Content-Type: text/plain\r\n" +
             "Content-Length: " + pathsize + "\r\n\r\n" +
             cont + "\r\n";
+
+            System.out.println(response);
+
+            clientSocket.getOutputStream().write(response.getBytes());
           }else{
             clientSocket.getOutputStream().write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
           }
         }else{
           clientSocket.getOutputStream().write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
         }
-    
-      // serverSocket.accept(); // Wait for connection from client.
-
-      // if(path.equals("/") || path == null){
-      //   clientSocket.getOutputStream().write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
-      // }else{
-      //   clientSocket.getOutputStream().write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
-      // }
-
-      
-
-      System.out.println(response);
-
-      clientSocket.getOutputStream().write(response.getBytes());
 
     } catch (IOException e) {
       System.out.println("IOException: " + e.getMessage());
