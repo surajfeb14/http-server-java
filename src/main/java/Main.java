@@ -31,7 +31,7 @@ public class Main {
 
       String[] parts = requestLine.split(" ");
         String path = parts[1];
-        String pathsize = Integer.toString(path.length());`
+        String pathsize = Integer.toString(path.length());
     
       // serverSocket.accept(); // Wait for connection from client.
 
