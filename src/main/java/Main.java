@@ -48,9 +48,9 @@ public class Main {
               userAgent = parts[userAgentIndex + 1];
           }
       }
-
+      
+      System.out.println("User-Agent: " + userAgent);
       if (userAgent != null) {
-          System.out.println("User-Agent: " + userAgent);
           response = "HTTP/1.1 200 OK\r\n" +
             "Content-Type: text/plain\r\n" +
             "Content-Length: " + userAgent.length() + "\r\n\r\n" +
