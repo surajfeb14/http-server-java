@@ -37,6 +37,8 @@ public class Main {
       String response = "";
 
       userAgent = requestLine.split("User-Agent:")[1];
+      System.out.println( "UA: "  + userAgent);
+
 
       if (userAgent != null) {
           System.out.println("User-Agent: " + userAgent);
@@ -44,6 +46,8 @@ public class Main {
             "Content-Type: text/plain\r\n" +
             "Content-Length: " + userAgent.length() + "\r\n\r\n" +
             userAgent + "\r\n";
+
+            clientSocket.getOutputStream().write(response.getBytes());
       } else {
           System.out.println("User-Agent header not found.");
           clientSocket.getOutputStream().write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
