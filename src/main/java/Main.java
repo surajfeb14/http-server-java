@@ -40,8 +40,10 @@ public class Main {
       System.out.println("path: " + path);
 
       String userAgent = null;
-      int userAgentIndex;
-      for (userAgentIndex = 0; parts[userAgentIndex].equals("User-Agent:"); userAgentIndex++);
+      int userAgentIndex = 0;
+      while (! parts[userAgentIndex].equals("User-Agent:")){
+        userAgentIndex++;
+      }
       userAgent = parts[userAgentIndex + 1];
 
       String response = "";
