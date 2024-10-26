@@ -31,6 +31,7 @@ public class Main {
 
       String[] parts = requestLine.split(" ");
         String path = parts[1];
+        String pathsize = Integer.toString(path.length());`
     
       // serverSocket.accept(); // Wait for connection from client.
 
@@ -40,7 +41,7 @@ public class Main {
       //   clientSocket.getOutputStream().write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
       // }
       
-        clientSocket.getOutputStream().write("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {path.length}\r\n\r\n{path}\r\n".getBytes());
+        clientSocket.getOutputStream().write("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + pathsize + "\r\n\r\n" + path + "\r\n".getBytes());
 
     } catch (IOException e) {
       System.out.println("IOException: " + e.getMessage());
