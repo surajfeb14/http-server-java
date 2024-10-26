@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.*;
 
 public class Main {
   public static void main(String[] args) {
@@ -29,36 +30,17 @@ public class Main {
 
       String requestLine = reader.readLine();
 
-      
-
       String[] parts = requestLine.split(" ");
+      System.out.println("parts: " + Arrays.toString(parts));
+      
       String path = parts[1];
+      System.out.println("path: " + path);
+      
       String userAgent = null;
       String response = "";
-
-      userAgent = requestLine.split("User-Agent:")[1];
-      System.out.println( "UA: "  + userAgent);
-
-
-      if (userAgent != null) {
-          System.out.println("User-Agent: " + userAgent);
-          response = "HTTP/1.1 200 OK\r\n" +
-            "Content-Type: text/plain\r\n" +
-            "Content-Length: " + userAgent.length() + "\r\n\r\n" +
-            userAgent + "\r\n";
-
-            clientSocket.getOutputStream().write(response.getBytes());
-      } else {
-          System.out.println("User-Agent header not found.");
-          clientSocket.getOutputStream().write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
-      }
-
-        
-
-        System.out.println("path: " + path);
-        // System.out.println(pathsize);
-
-        String[] pathArr = path.split("/");
+      
+      String[] pathArr = path.split("/");
+      System.out.println("pathArr " + Arrays.toString(pathArr));
 
 
         if(pathArr.length > 1){
@@ -73,15 +55,16 @@ public class Main {
             "Content-Length: " + pathsize + "\r\n\r\n" +
             cont + "\r\n";
 
-            System.out.println(response);
-
-            clientSocket.getOutputStream().write(response.getBytes());
           }else{
-            clientSocket.getOutputStream().write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
+            response = "HTTP/1.1 404 Not Found\r\n\r\n";
           }
         }else{
-          clientSocket.getOutputStream().write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+          response = "HTTP/1.1 200 OK\r\n\r\n";
         }
+
+
+        System.out.println("res: " + response);
+        clientSocket.getOutputStream().write(response.getBytes());
 
     } catch (IOException e) {
       System.out.println("IOException: " + e.getMessage());
