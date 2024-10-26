@@ -29,8 +29,8 @@ public class Main {
       BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
       // String requestLine = reader.readLine();
-      String requestLine = null;
-      for (String line; (line = reader.readLine()) != null; requestLine += line);
+      String requestLine = "";
+      for (String line; (line = reader.readLine()) != null; requestLine += line + " ");
       System.out.println("req: " + (requestLine));
 
       String[] parts = requestLine.split(" ");
@@ -38,8 +38,12 @@ public class Main {
       
       String path = parts[1];
       System.out.println("path: " + path);
-      
+
       String userAgent = null;
+      int userAgentIndex;
+      for (userAgentIndex = 0; parts[userAgentIndex].equals("User-Agent:"); userAgentIndex++);
+      userAgent = parts[userAgentIndex + 1];
+
       String response = "";
       
       String[] pathArr = path.split("/");
@@ -58,12 +62,23 @@ public class Main {
             "Content-Length: " + pathsize + "\r\n\r\n" +
             cont + "\r\n";
 
-          }else{
+          }
+          if(userAgent != null){
+            response = "HTTP/1.1 200 OK\r\n" +
+            "Content-Type: text/plain\r\n" +
+            "Content-Length: " + userAgent.length() + "\r\n\r\n" +
+            userAgent + "\r\n";
+          }
+          else{
             response = "HTTP/1.1 404 Not Found\r\n\r\n";
           }
         }else{
           response = "HTTP/1.1 200 OK\r\n\r\n";
         }
+
+
+
+
 
 
         System.out.println("res: " + response);
