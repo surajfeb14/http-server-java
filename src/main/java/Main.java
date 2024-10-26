@@ -39,7 +39,7 @@ public class Main {
       if (parts != null && parts.length > 0) {
           int userAgentIndex = -1;
           for (int i = 0; i < parts.length; i++) {
-              if (parts[i].equals("'User-Agent:")) {
+              if (parts[i].equals("\"User-Agent:")) {
                   userAgentIndex = i;
                   break;
               }
