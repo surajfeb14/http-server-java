@@ -73,9 +73,8 @@ public class Main {
         }
 
         if(userAgent != null){
-          response = "HTTP/1.1 200 OK\r\n" +
-          "Content-Type: text/plain\r\n" +
-          "Content-Length: " + userAgent.length() + "\r\n\r\n" +
+          response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " 
+          + userAgent.length() + "\r\n\r\n" +
           userAgent + "\r\n";
         }else{
           response = "HTTP/1.1 404 Not Found\r\n\r\n";
