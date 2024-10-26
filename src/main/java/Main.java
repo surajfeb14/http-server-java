@@ -40,7 +40,7 @@ public class Main {
 
         String response = "";
 
-        if(pathArr.length > 0){
+        if(pathArr.length > 1){
           if(pathArr[0].equals("echo")){
             
             String cont = pathArr[1];
