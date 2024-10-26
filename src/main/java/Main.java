@@ -63,17 +63,20 @@ public class Main {
             cont + "\r\n";
 
           }
-          if(userAgent != null){
-            response = "HTTP/1.1 200 OK\r\n" +
-            "Content-Type: text/plain\r\n" +
-            "Content-Length: " + userAgent.length() + "\r\n\r\n" +
-            userAgent + "\r\n";
-          }
           else{
             response = "HTTP/1.1 404 Not Found\r\n\r\n";
           }
         }else{
           response = "HTTP/1.1 200 OK\r\n\r\n";
+        }
+
+        if(userAgent != null){
+          response = "HTTP/1.1 200 OK\r\n" +
+          "Content-Type: text/plain\r\n" +
+          "Content-Length: " + userAgent.length() + "\r\n\r\n" +
+          userAgent + "\r\n";
+        }else{
+          response = "HTTP/1.1 404 Not Found\r\n\r\n";
         }
 
 
