@@ -38,13 +38,15 @@ public class Main {
 
         String[] pathArr = path.split("/");
 
+        String response = "";
+
         if(pathArr.length > 0){
           if(pathArr[0].equals("echo")){
             
             String cont = pathArr[1];
             String pathsize = Integer.toString(cont.length());
             
-            String response = "HTTP/1.1 200 OK\r\n" +
+            response = "HTTP/1.1 200 OK\r\n" +
             "Content-Type: text/plain\r\n" +
             "Content-Length: " + pathsize + "\r\n\r\n" +
             path + "\r\n";
