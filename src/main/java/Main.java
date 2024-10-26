@@ -32,6 +32,9 @@ public class Main {
       String[] parts = requestLine.split(" ");
         String path = parts[1];
         String pathsize = Integer.toString(path.length());
+
+        System.out.println(path);
+        System.out.println(pathsize);
     
       // serverSocket.accept(); // Wait for connection from client.
 
@@ -45,6 +48,8 @@ public class Main {
       "Content-Type: text/plain\r\n" +
       "Content-Length: " + pathsize + "\r\n\r\n" +
       path + "\r\n";
+
+      System.out.println(response);
 
       clientSocket.getOutputStream().write(response.getBytes());
 
