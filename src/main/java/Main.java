@@ -34,7 +34,7 @@ public class Main {
     
       // serverSocket.accept(); // Wait for connection from client.
 
-      if(path.equals("") || path == null){
+      if(path.equals("/") || path == null){
 
         clientSocket.getOutputStream().write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
       }else{
