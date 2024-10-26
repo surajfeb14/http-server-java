@@ -28,7 +28,9 @@ public class Main {
 
       BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-      String requestLine = reader.readLine();
+      // String requestLine = reader.readLine();
+      String requestLine = null;
+      for (String line; (line = reader.readLine()) != null; requestLine += line);
       System.out.println("req: " + (requestLine));
 
       String[] parts = requestLine.split(" ");
