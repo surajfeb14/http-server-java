@@ -39,7 +39,7 @@ public class Main {
       if (parts != null && parts.length > 0) {
           int userAgentIndex = -1;
           for (int i = 0; i < parts.length; i++) {
-              if (parts[i].equals("User-Agent:")) {
+              if (parts[i].equals("'User-Agent:")) {
                   userAgentIndex = i;
                   break;
               }
@@ -48,9 +48,9 @@ public class Main {
               userAgent = parts[userAgentIndex + 1];
           }
       }
-      
-      System.out.println("User-Agent: " + userAgent);
+
       if (userAgent != null) {
+          System.out.println("User-Agent: " + userAgent);
           response = "HTTP/1.1 200 OK\r\n" +
             "Content-Type: text/plain\r\n" +
             "Content-Length: " + userAgent.length() + "\r\n\r\n" +
