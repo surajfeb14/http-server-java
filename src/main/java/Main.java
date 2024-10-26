@@ -33,7 +33,7 @@ public class Main {
         String path = parts[1];
         
 
-        System.out.println("path" + path);
+        System.out.println("path: " + path);
         // System.out.println(pathsize);
 
         String[] pathArr = path.split("/");
@@ -41,9 +41,9 @@ public class Main {
         String response = "";
 
         if(pathArr.length > 1){
-          if(pathArr[0].equals("echo")){
+          if(pathArr[1].equals("echo")){
             
-            String cont = pathArr[1];
+            String cont = pathArr[2];
             System.out.println("cont" + cont);
             String pathsize = Integer.toString(cont.length());
             
