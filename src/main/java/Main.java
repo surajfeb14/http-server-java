@@ -44,13 +44,13 @@ public class Main {
           if(pathArr[1].equals("echo")){
             
             String cont = pathArr[2];
-            System.out.println("cont" + cont);
+            System.out.println("cont: " + cont);
             String pathsize = Integer.toString(cont.length());
             
             response = "HTTP/1.1 200 OK\r\n" +
             "Content-Type: text/plain\r\n" +
             "Content-Length: " + pathsize + "\r\n\r\n" +
-            path + "\r\n";
+            cont + "\r\n";
           }else{
             clientSocket.getOutputStream().write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
           }
