@@ -36,18 +36,7 @@ public class Main {
       String userAgent = null;
       String response = "";
 
-      if (parts != null && parts.length > 0) {
-          int userAgentIndex = -1;
-          for (int i = 0; i < parts.length; i++) {
-              if (parts[i].equals("\"User-Agent:")) {
-                  userAgentIndex = i;
-                  break;
-              }
-          }
-          if (userAgentIndex != -1 && userAgentIndex + 1 < parts.length) {
-              userAgent = parts[userAgentIndex + 1];
-          }
-      }
+      userAgent = requestLine.split("User-Agent:")[1];
 
       if (userAgent != null) {
           System.out.println("User-Agent: " + userAgent);
