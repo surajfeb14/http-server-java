@@ -31,10 +31,29 @@ public class Main {
 
       String[] parts = requestLine.split(" ");
         String path = parts[1];
-        String pathsize = Integer.toString(path.length());
+        
 
         System.out.println(path);
-        System.out.println(pathsize);
+        // System.out.println(pathsize);
+
+        String[] pathArr = path.split("/");
+
+        if(pathArr.length > 0){
+          if(pathArr[0].equals("echo")){
+            
+            String cont = pathArr[1];
+            String pathsize = Integer.toString(cont.length());
+            
+            String response = "HTTP/1.1 200 OK\r\n" +
+            "Content-Type: text/plain\r\n" +
+            "Content-Length: " + pathsize + "\r\n\r\n" +
+            path + "\r\n";
+          }else{
+            clientSocket.getOutputStream().write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
+          }
+        }else{
+          clientSocket.getOutputStream().write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+        }
     
       // serverSocket.accept(); // Wait for connection from client.
 
@@ -44,10 +63,7 @@ public class Main {
       //   clientSocket.getOutputStream().write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
       // }
 
-      String response = "HTTP/1.1 200 OK\r\n" +
-      "Content-Type: text/plain\r\n" +
-      "Content-Length: " + pathsize + "\r\n\r\n" +
-      path + "\r\n";
+      
 
       System.out.println(response);
 
