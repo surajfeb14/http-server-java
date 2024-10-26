@@ -32,7 +32,7 @@ public class Main {
       // String requestLine = "";
       HashMap<String,String> header = new HashMap<>();
       String read = reader.readLine();
-      while(read != null ){
+      while(read != null && !read.isEmpty()){
         String[] Arr = read.split(":");
         header.put(Arr[0], Arr[1]);
       }
