@@ -30,6 +30,12 @@ public class Main {
 
       String requestLine = reader.readLine();
       // String requestLine = "";
+      HashMap<String,String> header = new HashMap<>();
+      String read = reader.readLine();
+      while(read != null ){
+        String[] Arr = read.split(":");
+        header.put(Arr[0], Arr[1]);
+      }
       // for (String line; (line = reader.readLine()) != null; requestLine += line + " ");
       System.out.println("req: " + (requestLine));
 
@@ -39,13 +45,14 @@ public class Main {
       String path = parts[1];
       System.out.println("path: " + path);
 
-      String userAgent = null;
-      int userAgentIndex = 0;
-      while (! parts[userAgentIndex].equals("User-Agent:")){
-        userAgentIndex++;
-      }
-      userAgent = parts[userAgentIndex + 1];
+      String userAgent = header.getOrDefault("User-Agent", null);
+      // int userAgentIndex = 0;
+      // while (! parts[userAgentIndex].equals("User-Agent:")){
+      //   userAgentIndex++;
+      // }
+      // userAgent = parts[userAgentIndex + 1];
 
+      
       String response = "";
       
       String[] pathArr = path.split("/");
