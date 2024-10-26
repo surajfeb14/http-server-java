@@ -33,7 +33,7 @@ public class Main {
         String path = parts[1];
         
 
-        System.out.println(path);
+        System.out.println("path" + path);
         // System.out.println(pathsize);
 
         String[] pathArr = path.split("/");
@@ -44,6 +44,7 @@ public class Main {
           if(pathArr[0].equals("echo")){
             
             String cont = pathArr[1];
+            System.out.println("cont" + cont);
             String pathsize = Integer.toString(cont.length());
             
             response = "HTTP/1.1 200 OK\r\n" +
