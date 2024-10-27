@@ -46,7 +46,11 @@ public class Main {
 
             // Handle the response based on path
             String[] pathArr = path.split("/");
-            if (pathArr.length > 1 && "echo".equals(pathArr[1])) {
+            if (path.equals("/")) {
+                response = "HTTP/1.1 200 OK\r\n" +
+                        "Content-Type: text/plain\r\n" +
+                        "Content-Length: 0\r\n\r\n";
+            } else if (pathArr.length > 1 && "echo".equals(pathArr[1])) {
                 String content = pathArr.length > 2 ? pathArr[2] : "";
                 response = "HTTP/1.1 200 OK\r\n" +
                         "Content-Type: text/plain\r\n" +
