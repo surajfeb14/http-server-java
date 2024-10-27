@@ -1,9 +1,38 @@
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+
+public class Main {
+  public static void main(String[] args) {
+      System.out.println("Logs from your program will appear here!");
+
+      // Parse directory argument
+      String directory = "/tmp/"; // default directory
+      for (int i = 0; i < args.length; i++) {
+          if (args[i].equals("--directory") && i + 1 < args.length) {
+              directory = args[i + 1];
+              break;
+          }
+      }
+
+      try (ServerSocket serverSocket = new ServerSocket(4221)) {
+          serverSocket.setReuseAddress(true);
+
+          while (true) {
+              Socket clientSocket = serverSocket.accept();
+              System.out.println("Accepted new connection");
+
+              new Thread(new ConnectionHandler(clientSocket, directory)).start();
+          }
+      } catch (IOException e) {
+          System.out.println("IOException: " + e.getMessage());
+      }
+  }
+}
 
 class ConnectionHandler implements Runnable {
     private final Socket clientSocket;
