@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.io.File; 
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.util.Scanner;
 
 public class Main {
@@ -21,7 +22,7 @@ public class Main {
                 System.out.println("Accepted new connection");
 
                 // Create a new thread for each connection
-                new Thread(new ConnectionHandler(clientSocket)).start();
+                new Thread(new ConnectionHandler(clientSocket, args)).start();
             }
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
@@ -31,14 +32,17 @@ public class Main {
 
 class ConnectionHandler implements Runnable {
     private final Socket clientSocket;
+    String[] args;
 
-    public ConnectionHandler(Socket clientSocket) {
+    public ConnectionHandler(Socket clientSocket, String[] args) {
         this.clientSocket = clientSocket;
+        this.args = args;
     }
 
     @Override
     public void run() {
         String response = "";
+        String body = "";
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
              OutputStream out = clientSocket.getOutputStream()) {
@@ -50,6 +54,7 @@ class ConnectionHandler implements Runnable {
             HashMap<String, String> headers = new HashMap<>();
             String read;
             while ((read = reader.readLine()) != null && !read.isEmpty()) {
+                body = read;
                 String[] arr = read.split(": ");
                 if (arr.length == 2) {
                     headers.put(arr[0], arr[1]);
@@ -60,12 +65,45 @@ class ConnectionHandler implements Runnable {
             String[] parts = requestLine.split(" ");
             String path = parts.length > 1 ? parts[1] : "/";
             System.out.println("Path: " + path);
+            
+            // Handle the response based on path
+            String[] pathArr = path.split("/");
+
+            //For POST
+            if(parts[0].equals("POST")){
+              if (pathArr.length > 1 && "files".equals(pathArr[1])) {
+                try{
+                  File file = new File("/tmp/data/codecrafters.io/http-server-tester/" + path.substring(7));
+                  FileWriter myWriter = new FileWriter(file);
+
+                  myWriter.write(body);
+                  myWriter.close();
+                  file.createNewFile();
+                  String data = "";
+                  String dataSize = "";
+                    dataSize = String.valueOf(file.length());
+                    Scanner myReader = new Scanner(file);
+                    while (myReader.hasNextLine()) {
+                      data += myReader.nextLine() + " ";
+                      System.out.println(data);
+                    }
+                    myReader.close();
+                    response = "HTTP/1.1 200 OK\r\n" +
+                        "Content-Type: application/octet-stream\r\n" +
+                        "Content-Length: " + dataSize + "\r\n\r\n" +
+                        data;
+                  }catch(Exception e){
+                    System.out.println("File not found");
+                    response = "HTTP/1.1 404 Not Found\r\n\r\n";
+                    e.printStackTrace();
+                  }
+              }
+
+            }
 
             // Parse User-Agent if present
             String userAgent = headers.get("User-Agent");
 
-            // Handle the response based on path
-            String[] pathArr = path.split("/");
             if (path.equals("/")) {
                 response = "HTTP/1.1 200 OK\r\n" +
                         "Content-Type: text/plain\r\n" +
