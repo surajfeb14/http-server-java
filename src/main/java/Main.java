@@ -1,19 +1,23 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
-import java.io.File; 
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.util.Scanner;
-import java.util.Arrays;
 
 public class Main {
     public static void main(String[] args) {
         System.out.println("Logs from your program will appear here!");
+
+        // Parse directory argument
+        String directory = "/tmp/"; // default directory
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("--directory") && i + 1 < args.length) {
+                directory = args[i + 1];
+                break;
+            }
+        }
 
         try (ServerSocket serverSocket = new ServerSocket(4221)) {
             serverSocket.setReuseAddress(true);
@@ -22,8 +26,7 @@ public class Main {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Accepted new connection");
 
-                // Create a new thread for each connection
-                new Thread(new ConnectionHandler(clientSocket, args)).start();
+                new Thread(new ConnectionHandler(clientSocket, directory)).start();
             }
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
@@ -33,17 +36,16 @@ public class Main {
 
 class ConnectionHandler implements Runnable {
     private final Socket clientSocket;
-    String[] args;
+    private final String directory;
 
-    public ConnectionHandler(Socket clientSocket, String[] args) {
+    public ConnectionHandler(Socket clientSocket, String directory) {
         this.clientSocket = clientSocket;
-        this.args = args;
+        this.directory = directory;
     }
 
     @Override
     public void run() {
         String response = "";
-        String body = "";
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
              OutputStream out = clientSocket.getOutputStream()) {
@@ -52,96 +54,58 @@ class ConnectionHandler implements Runnable {
             String requestLine = reader.readLine();
             System.out.println("Request Line: " + requestLine);
 
+            if (requestLine == null) {
+                return;
+            }
+
+            String[] requestParts = requestLine.split(" ");
+            String method = requestParts[0];
+            String path = requestParts.length > 1 ? requestParts[1] : "/";
+            String[] pathParts = path.split("/");
+
             HashMap<String, String> headers = new HashMap<>();
-            String read;
-            while ((read = reader.readLine()) != null && !read.isEmpty()) {
-                String[] arr = read.split(": ");
+            String line;
+            while ((line = reader.readLine()) != null && !line.isEmpty()) {
+                String[] arr = line.split(": ");
                 if (arr.length == 2) {
                     headers.put(arr[0], arr[1]);
                 }
             }
-            while ((read = reader.readLine()) != null){
-              body += reader.readLine() + " ";
-            }
-            reader.close();
-            
 
+            if ("POST".equals(method) && pathParts.length == 3 && "files".equals(pathParts[1])) {
+                String filename = pathParts[2];
+                int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
 
-            // Parse request line parts
-            String[] parts = requestLine.split(" ");
-            System.out.println("parts: "+Arrays.toString(parts));
-            String path = parts.length > 1 ? parts[1] : "/";
-            System.out.println("Path: " + path);
-            
-            // Handle the response based on path
-            String[] pathArr = path.split("/");
+                // Read request body
+                char[] body = new char[contentLength];
+                reader.read(body, 0, contentLength);
+                String bodyContent = new String(body);
 
-            //For POST
-            if(parts[0].equals("POST")){
-              if (pathArr.length > 1 && (pathArr[1].startsWith("/files/"))) {
-                try{
-                  File file = new File("/tmp/data/codecrafters.io/http-server-tester/" + path.substring(7));
-                  FileWriter myWriter = new FileWriter(file);
-                  System.out.println("Body: " + body);
-                  myWriter.write(body);
-                  myWriter.close();
-                  file.createNewFile();
-                  System.out.println("File: " + file.getAbsolutePath());
-                  response = "HTTP/1.1 201 Created\r\n\r\n";
-                  }catch(Exception e){
-                    System.out.println("File not created");
-                    response = "HTTP/1.1 404 Not Found\r\n\r\n";
-                  }
-              }
-            }else{
-
-              
-              // Parse User-Agent if present
-              String userAgent = headers.get("User-Agent");
-              
-              if (path.equals("/")) {
-                response = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/plain\r\n" +
-                "Content-Length: 0\r\n\r\n";
-              } else if (pathArr.length > 1 && "echo".equals(pathArr[1])) {
-                String content = pathArr.length > 2 ? pathArr[2] : "";
-                response = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/plain\r\n" +
-                "Content-Length: " + content.length() + "\r\n\r\n" +
-                content;
-              } else if (userAgent != null) {
-                response = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/plain\r\n" +
-                "Content-Length: " + userAgent.length() + "\r\n\r\n" +
-                userAgent;
-              } else if (pathArr.length > 1 && "files".equals(pathArr[1])) {
-                try{
-                  File file = new File("/tmp/data/codecrafters.io/http-server-tester/" + path.substring(7));
-                  String data = "";
-                  String dataSize = "";
-                  dataSize = String.valueOf(file.length());
-                  Scanner myReader = new Scanner(file);
-                  while (myReader.hasNextLine()) {
-                    data += myReader.nextLine() + " ";
-                    System.out.println(data);
-                  }
-                  myReader.close();
-                  response = "HTTP/1.1 200 OK\r\n" +
-                  "Content-Type: application/octet-stream\r\n" +
-                  "Content-Length: " + dataSize + "\r\n\r\n" +
-                  data;
-                }catch(Exception e){
-                  System.out.println("File not found");
-                  response = "HTTP/1.1 404 Not Found\r\n\r\n";
-                  e.printStackTrace();
+                // Write the body content to the file
+                Path filePath = Paths.get(directory, filename);
+                try (FileWriter fileWriter = new FileWriter(filePath.toFile())) {
+                    fileWriter.write(bodyContent);
                 }
-                
-              }else {
-                response = "HTTP/1.1 404 Not Found\r\n\r\n";
-              }
-            }
 
-            System.out.println("Response: " + response);
+                // Send 201 Created response
+                response = "HTTP/1.1 201 Created\r\n\r\n";
+            } else if ("GET".equals(method) && path.equals("/")) {
+                response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 0\r\n\r\n";
+            } else if ("GET".equals(method) && pathParts.length > 1 && "echo".equals(pathParts[1])) {
+                String content = pathParts.length > 2 ? pathParts[2] : "";
+                response = "HTTP/1.1 200 OK\r\n" +
+                        "Content-Type: text/plain\r\n" +
+                        "Content-Length: " + content.length() + "\r\n\r\n" +
+                        content;
+            } else if (headers.containsKey("User-Agent")) {
+                String userAgent = headers.get("User-Agent");
+                response = "HTTP/1.1 200 OK\r\n" +
+                        "Content-Type: text/plain\r\n" +
+                        "Content-Length: " + userAgent.length() + "\r\n\r\n" +
+                        userAgent;
+            } else {
+                response = "HTTP/1.1 404 Not Found\r\n\r\n";
+            }
 
             // Send response
             out.write(response.getBytes());
@@ -150,7 +114,6 @@ class ConnectionHandler implements Runnable {
         } catch (IOException e) {
             System.out.println("IOException in handler: " + e.getMessage());
         } finally {
-            // Close client connection
             try {
                 clientSocket.close();
             } catch (IOException e) {
