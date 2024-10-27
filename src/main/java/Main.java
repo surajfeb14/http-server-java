@@ -37,7 +37,7 @@ public class Main {
         header.put(Arr[0], Arr[1]);
       }
       // for (String line; (line = reader.readLine()) != null; requestLine += line + " ");
-      System.out.println("req: " + (requestLine));
+      System.out.println("request: " + (requestLine));
 
       String[] parts = requestLine.split(" ");
       System.out.println("parts: " + Arrays.toString(parts));
