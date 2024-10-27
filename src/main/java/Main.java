@@ -83,7 +83,7 @@ class ConnectionHandler implements Runnable {
                         userAgent;
             } else if (pathArr.length > 1 && "files".equals(pathArr[1])) {
               try{
-                File file = new File(path.substring(7));
+                File file = new File("/tmp/data/codecrafters.io/http-server-tester/" + path.substring(7));
                 String data = "";
                 String dataSize = "";
                   dataSize = String.valueOf(file.length());
