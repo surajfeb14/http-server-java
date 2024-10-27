@@ -79,26 +79,14 @@ class ConnectionHandler implements Runnable {
                   myWriter.write(body);
                   myWriter.close();
                   file.createNewFile();
-                  String data = "";
-                  String dataSize = "";
-                    dataSize = String.valueOf(file.length());
-                    Scanner myReader = new Scanner(file);
-                    while (myReader.hasNextLine()) {
-                      data += myReader.nextLine() + " ";
-                      System.out.println(data);
-                    }
-                    myReader.close();
-                    response = "HTTP/1.1 200 OK\r\n" +
-                        "Content-Type: application/octet-stream\r\n" +
-                        "Content-Length: " + dataSize + "\r\n\r\n" +
-                        data;
+                    
+                  response = "HTTP/1.1 201 Created\r\n\r\n";
                   }catch(Exception e){
                     System.out.println("File not found");
                     response = "HTTP/1.1 404 Not Found\r\n\r\n";
                     e.printStackTrace();
                   }
               }
-
             }
 
             // Parse User-Agent if present
