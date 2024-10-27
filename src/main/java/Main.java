@@ -73,11 +73,11 @@ class ConnectionHandler implements Runnable {
 
             //For POST
             if(parts[0].equals("POST")){
-              if (pathArr.length > 1 && "files".equals(pathArr[1])) {
+              if (pathArr.length > 1 && (pathArr[1].startsWith("/files/"))) {
                 try{
                   File file = new File("/tmp/data/codecrafters.io/http-server-tester/" + path.substring(7));
                   FileWriter myWriter = new FileWriter(file);
-                  System.out.println("Body: "+body);
+                  System.out.println("Body: " + body);
                   myWriter.write(body);
                   myWriter.close();
                   file.createNewFile();
