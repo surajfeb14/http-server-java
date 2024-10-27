@@ -87,31 +87,32 @@ class ConnectionHandler implements Runnable {
                     e.printStackTrace();
                   }
               }
-            }
+            }else{
 
-            // Parse User-Agent if present
-            String userAgent = headers.get("User-Agent");
-
-            if (path.equals("/")) {
+              
+              // Parse User-Agent if present
+              String userAgent = headers.get("User-Agent");
+              
+              if (path.equals("/")) {
                 response = "HTTP/1.1 200 OK\r\n" +
-                        "Content-Type: text/plain\r\n" +
-                        "Content-Length: 0\r\n\r\n";
-            } else if (pathArr.length > 1 && "echo".equals(pathArr[1])) {
+                "Content-Type: text/plain\r\n" +
+                "Content-Length: 0\r\n\r\n";
+              } else if (pathArr.length > 1 && "echo".equals(pathArr[1])) {
                 String content = pathArr.length > 2 ? pathArr[2] : "";
                 response = "HTTP/1.1 200 OK\r\n" +
-                        "Content-Type: text/plain\r\n" +
-                        "Content-Length: " + content.length() + "\r\n\r\n" +
-                        content;
-            } else if (userAgent != null) {
+                "Content-Type: text/plain\r\n" +
+                "Content-Length: " + content.length() + "\r\n\r\n" +
+                content;
+              } else if (userAgent != null) {
                 response = "HTTP/1.1 200 OK\r\n" +
-                        "Content-Type: text/plain\r\n" +
-                        "Content-Length: " + userAgent.length() + "\r\n\r\n" +
-                        userAgent;
-            } else if (pathArr.length > 1 && "files".equals(pathArr[1])) {
-              try{
-                File file = new File("/tmp/data/codecrafters.io/http-server-tester/" + path.substring(7));
-                String data = "";
-                String dataSize = "";
+                "Content-Type: text/plain\r\n" +
+                "Content-Length: " + userAgent.length() + "\r\n\r\n" +
+                userAgent;
+              } else if (pathArr.length > 1 && "files".equals(pathArr[1])) {
+                try{
+                  File file = new File("/tmp/data/codecrafters.io/http-server-tester/" + path.substring(7));
+                  String data = "";
+                  String dataSize = "";
                   dataSize = String.valueOf(file.length());
                   Scanner myReader = new Scanner(file);
                   while (myReader.hasNextLine()) {
@@ -120,17 +121,18 @@ class ConnectionHandler implements Runnable {
                   }
                   myReader.close();
                   response = "HTTP/1.1 200 OK\r\n" +
-                      "Content-Type: application/octet-stream\r\n" +
-                      "Content-Length: " + dataSize + "\r\n\r\n" +
-                      data;
+                  "Content-Type: application/octet-stream\r\n" +
+                  "Content-Length: " + dataSize + "\r\n\r\n" +
+                  data;
                 }catch(Exception e){
                   System.out.println("File not found");
                   response = "HTTP/1.1 404 Not Found\r\n\r\n";
                   e.printStackTrace();
                 }
-              
-            }else {
+                
+              }else {
                 response = "HTTP/1.1 404 Not Found\r\n\r\n";
+              }
             }
 
             System.out.println("Response: " + response);
