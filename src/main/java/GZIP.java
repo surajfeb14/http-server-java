@@ -72,18 +72,7 @@ class ConnectionHandler implements Runnable {
                 }
             }
 
-            // Parse Accept-Encoding header for gzip
-            boolean shouldCompress = false;
-            String acceptEncoding = headers.get("Accept-Encoding");
-            if (acceptEncoding != null) {
-                String[] encodings = acceptEncoding.split(", ");
-                for (String encoding : encodings) {
-                    if ("gzip".equalsIgnoreCase(encoding.trim())) {
-                        shouldCompress = true;
-                        break;
-                    }
-                }
-            }
+            boolean shouldCompress = "gzip".equals(headers.get("Accept-Encoding"));
 
             if ("POST".equals(method) && pathParts.length == 3 && "files".equals(pathParts[1])) {
                 String filename = pathParts[2];
