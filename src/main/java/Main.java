@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.util.Scanner;
+import java.util.Arrays;
 
 public class Main {
     public static void main(String[] args) {
@@ -63,6 +64,7 @@ class ConnectionHandler implements Runnable {
 
             // Parse request line parts
             String[] parts = requestLine.split(" ");
+            System.out.println("parts: "+Arrays.toString(parts));
             String path = parts.length > 1 ? parts[1] : "/";
             System.out.println("Path: " + path);
             
