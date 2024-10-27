@@ -108,14 +108,17 @@ class ConnectionHandler implements Runnable {
 
                 if (Files.exists(filePath)) {
                     responseBody = Files.readAllBytes(filePath);
-                    response = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\n";
+                    response = "HTTP/1.1 200 OK\r\n" +
+                               "Content-Type: application/octet-stream\r\n" +
+                               "Content-Length: " + responseBody.length + "\r\n" +
+                               "\r\n";  // Separate headers from the body with CRLF
                 } else {
                     response = "HTTP/1.1 404 Not Found\r\n\r\n";
                     responseBody = new byte[0];
                 }
 
             } else if ("GET".equals(method) && path.equals("/")) {
-                response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n";
+                response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n";
                 responseBody = new byte[0];
 
             } else if ("GET".equals(method) && pathParts.length > 1 && "echo".equals(pathParts[1])) {
@@ -145,6 +148,7 @@ class ConnectionHandler implements Runnable {
                 responseBody = new byte[0];
             }
 
+            // Write response headers and body
             out.write(response.getBytes());
             out.write(responseBody);
             out.flush();
