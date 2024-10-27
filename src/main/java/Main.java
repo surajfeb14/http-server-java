@@ -10,18 +10,35 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Logs from your program will appear here!");
 
-        ServerSocket serverSocket = null;
-        Socket clientSocket = null;
-        String response = "";
-
-        try {
-            serverSocket = new ServerSocket(4221);
+        try (ServerSocket serverSocket = new ServerSocket(4221)) {
             serverSocket.setReuseAddress(true);
 
-            clientSocket = serverSocket.accept(); // Wait for connection from client
-            System.out.println("Accepted new connection");
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("Accepted new connection");
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                // Create a new thread for each connection
+                new Thread(new ConnectionHandler(clientSocket)).start();
+            }
+        } catch (IOException e) {
+            System.out.println("IOException: " + e.getMessage());
+        }
+    }
+}
+
+class ConnectionHandler implements Runnable {
+    private final Socket clientSocket;
+
+    public ConnectionHandler(Socket clientSocket) {
+        this.clientSocket = clientSocket;
+    }
+
+    @Override
+    public void run() {
+        String response = "";
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+             OutputStream out = clientSocket.getOutputStream()) {
 
             // Read the request line
             String requestLine = reader.readLine();
@@ -68,19 +85,17 @@ public class Main {
             System.out.println("Response: " + response);
 
             // Send response
-            OutputStream out = clientSocket.getOutputStream();
             out.write(response.getBytes());
             out.flush();
 
         } catch (IOException e) {
-            System.out.println("IOException: " + e.getMessage());
+            System.out.println("IOException in handler: " + e.getMessage());
         } finally {
-            // Close resources
+            // Close client connection
             try {
-                if (clientSocket != null) clientSocket.close();
-                if (serverSocket != null) serverSocket.close();
+                clientSocket.close();
             } catch (IOException e) {
-                System.out.println("IOException on closing: " + e.getMessage());
+                System.out.println("IOException on closing client socket: " + e.getMessage());
             }
         }
     }
