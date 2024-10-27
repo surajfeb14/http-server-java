@@ -55,12 +55,12 @@ class ConnectionHandler implements Runnable {
             HashMap<String, String> headers = new HashMap<>();
             String read;
             while ((read = reader.readLine()) != null && !read.isEmpty()) {
-                body = read;
                 String[] arr = read.split(": ");
                 if (arr.length == 2) {
                     headers.put(arr[0], arr[1]);
                 }
             }
+            body = reader.readLine();
 
             // Parse request line parts
             String[] parts = requestLine.split(" ");
