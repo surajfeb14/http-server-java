@@ -89,6 +89,25 @@ class ConnectionHandler implements Runnable {
 
                 // Send 201 Created response
                 response = "HTTP/1.1 201 Created\r\n\r\n";
+
+            } else if ("GET".equals(method) && pathParts.length == 3 && "files".equals(pathParts[1])) {
+                String filename = pathParts[2];
+                Path filePath = Paths.get(directory, filename);
+
+                if (Files.exists(filePath)) {
+                    // Read the file content
+                    String fileContent = new String(Files.readAllBytes(filePath));
+
+                    // Send 200 OK response with file content
+                    response = "HTTP/1.1 200 OK\r\n" +
+                            "Content-Type: application/octet-stream\r\n" +
+                            "Content-Length: " + fileContent.length() + "\r\n\r\n" +
+                            fileContent;
+                } else {
+                    // File not found
+                    response = "HTTP/1.1 404 Not Found\r\n\r\n";
+                }
+
             } else if ("GET".equals(method) && path.equals("/")) {
                 response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 0\r\n\r\n";
             } else if ("GET".equals(method) && pathParts.length > 1 && "echo".equals(pathParts[1])) {
