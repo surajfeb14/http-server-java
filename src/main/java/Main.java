@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.zip.GZIPOutputStream;
 
 public class Main {
     public static void main(String[] args) {
@@ -45,8 +46,6 @@ class ConnectionHandler implements Runnable {
 
     @Override
     public void run() {
-        String response = "";
-
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
              OutputStream out = clientSocket.getOutputStream()) {
 
@@ -72,7 +71,6 @@ class ConnectionHandler implements Runnable {
                 }
             }
 
-            // Parse Accept-Encoding header for gzip
             boolean shouldCompress = false;
             String acceptEncoding = headers.get("Accept-Encoding");
             if (acceptEncoding != null) {
@@ -85,71 +83,70 @@ class ConnectionHandler implements Runnable {
                 }
             }
 
+            String response = "";
+            byte[] responseBody;
+
             if ("POST".equals(method) && pathParts.length == 3 && "files".equals(pathParts[1])) {
                 String filename = pathParts[2];
                 int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
 
-                // Read request body
                 char[] body = new char[contentLength];
                 reader.read(body, 0, contentLength);
                 String bodyContent = new String(body);
 
-                // Write the body content to the file
                 Path filePath = Paths.get(directory, filename);
                 try (FileWriter fileWriter = new FileWriter(filePath.toFile())) {
                     fileWriter.write(bodyContent);
                 }
 
-                // Send 201 Created response
                 response = "HTTP/1.1 201 Created\r\n\r\n";
+                responseBody = new byte[0];
 
             } else if ("GET".equals(method) && pathParts.length == 3 && "files".equals(pathParts[1])) {
                 String filename = pathParts[2];
                 Path filePath = Paths.get(directory, filename);
 
                 if (Files.exists(filePath)) {
-                    // Read the file content
-                    String fileContent = new String(Files.readAllBytes(filePath));
-
-                    // Send 200 OK response with file content
-                    response = "HTTP/1.1 200 OK\r\n" +
-                            "Content-Type: application/octet-stream\r\n" +
-                            "Content-Length: " + fileContent.length() + "\r\n\r\n" +
-                            fileContent;
+                    responseBody = Files.readAllBytes(filePath);
+                    response = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\n";
                 } else {
-                    // File not found
                     response = "HTTP/1.1 404 Not Found\r\n\r\n";
+                    responseBody = new byte[0];
                 }
 
             } else if ("GET".equals(method) && path.equals("/")) {
-                response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 0\r\n\r\n";
+                response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n";
+                responseBody = new byte[0];
+
             } else if ("GET".equals(method) && pathParts.length > 1 && "echo".equals(pathParts[1])) {
                 String content = pathParts.length > 2 ? pathParts[2] : "";
-                StringBuilder responseBuilder = new StringBuilder();
+                response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n";
 
-                // Set Content-Encoding header if gzip is requested
-                responseBuilder.append("HTTP/1.1 200 OK\r\n")
-                        .append("Content-Type: text/plain\r\n")
-                        .append("Content-Length: ").append(content.length()).append("\r\n");
-                
                 if (shouldCompress) {
-                    responseBuilder.append("Content-Encoding: gzip\r\n");
+                    ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                    try (GZIPOutputStream gzipOut = new GZIPOutputStream(byteStream)) {
+                        gzipOut.write(content.getBytes());
+                    }
+                    responseBody = byteStream.toByteArray();
+                    response += "Content-Encoding: gzip\r\n";
+                } else {
+                    responseBody = content.getBytes();
                 }
-                
-                responseBuilder.append("\r\n").append(content);
-                response = responseBuilder.toString();
+                response += "Content-Length: " + responseBody.length + "\r\n\r\n";
+
             } else if (headers.containsKey("User-Agent")) {
                 String userAgent = headers.get("User-Agent");
-                response = "HTTP/1.1 200 OK\r\n" +
-                        "Content-Type: text/plain\r\n" +
-                        "Content-Length: " + userAgent.length() + "\r\n\r\n" +
-                        userAgent;
+                response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " +
+                        userAgent.length() + "\r\n\r\n" + userAgent;
+                responseBody = userAgent.getBytes();
+
             } else {
                 response = "HTTP/1.1 404 Not Found\r\n\r\n";
+                responseBody = new byte[0];
             }
 
-            // Send response
             out.write(response.getBytes());
+            out.write(responseBody);
             out.flush();
 
         } catch (IOException e) {
