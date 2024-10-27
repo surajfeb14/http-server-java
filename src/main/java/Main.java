@@ -14,6 +14,7 @@ public class Main {
     //
     ServerSocket serverSocket = null;
     Socket clientSocket = null;
+    String response = "";
 
     try {
       serverSocket = new ServerSocket(4221);
@@ -53,7 +54,7 @@ public class Main {
       // userAgent = parts[userAgentIndex + 1];
 
       
-      String response = "";
+      
       
       String[] pathArr = path.split("/");
       System.out.println("pathArr " + Arrays.toString(pathArr));
@@ -92,11 +93,19 @@ public class Main {
 
 
 
-        System.out.println("res: " + response);
-        clientSocket.getOutputStream().write(response.getBytes());
+        
 
     } catch (IOException e) {
       System.out.println("IOException: " + e.getMessage());
+    }finally{
+      System.out.println("res: " + response);
+      try{
+        clientSocket.getOutputStream().write(response.getBytes());
+        serverSocket.close();
+        clientSocket.close();
+      }catch (IOException e) {
+          System.out.println("IOException: " + e.getMessage());
     }
   }
+}
 }
