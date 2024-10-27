@@ -5,6 +5,9 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.io.File; 
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
@@ -78,7 +81,28 @@ class ConnectionHandler implements Runnable {
                         "Content-Type: text/plain\r\n" +
                         "Content-Length: " + userAgent.length() + "\r\n\r\n" +
                         userAgent;
-            } else {
+            } else if (pathArr.length > 1 && "files".equals(pathArr[1])) {
+              String data = "";
+              String dataSize = "";
+                try{
+                  File file = new File(path.substring(7));
+                  dataSize = String.valueOf(file.length());
+                  Scanner myReader = new Scanner(file);
+                  while (myReader.hasNextLine()) {
+                    data += myReader.nextLine() + " ";
+                    System.out.println(data);
+                  }
+                  myReader.close();
+                }catch(Exception e){
+                  System.out.println("File not found");
+                  response = "HTTP/1.1 404 Not Found\r\n\r\n";
+                  e.printStackTrace();
+                }
+              response = "HTTP/1.1 200 OK\r\n" +
+                      "Content-Type: application/octet-stream\r\n" +
+                      "Content-Length: " + dataSize + "\r\n\r\n" +
+                      data;
+            }else {
                 response = "HTTP/1.1 404 Not Found\r\n\r\n";
             }
 
