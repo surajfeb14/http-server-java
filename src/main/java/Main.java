@@ -1,111 +1,83 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.*;
+import java.util.HashMap;
 
 public class Main {
-  public static void main(String[] args) {
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
-    System.out.println("Logs from your program will appear here!");
+    public static void main(String[] args) {
+        System.out.println("Logs from your program will appear here!");
 
-    // Uncomment this block to pass the first stage
-    //
-    ServerSocket serverSocket = null;
-    Socket clientSocket = null;
-    String response = "";
+        ServerSocket serverSocket = null;
+        Socket clientSocket = null;
+        String response = "";
 
-    try {
-      serverSocket = new ServerSocket(4221);
-    
-      // Since the tester restarts your program quite often, setting SO_REUSEADDR
-      // ensures that we don't run into 'Address already in use' errors
-      serverSocket.setReuseAddress(true);
-      
-      clientSocket = serverSocket.accept(); // Wait for connection from client.
-      
-      System.out.println("accepted new connection");
+        try {
+            serverSocket = new ServerSocket(4221);
+            serverSocket.setReuseAddress(true);
 
-      BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            clientSocket = serverSocket.accept(); // Wait for connection from client
+            System.out.println("Accepted new connection");
 
-      String requestLine = reader.readLine();
-      // String requestLine = "";
-      HashMap<String,String> header = new HashMap<>();
-      String read = reader.readLine();
-      while(read != null && !read.isEmpty()){
-        String[] Arr = read.split(": ");
-        header.put(Arr[0], Arr[1]);
-      }
-      // for (String line; (line = reader.readLine()) != null; requestLine += line + " ");
-      System.out.println("request: " + (requestLine));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-      String[] parts = requestLine.split(" ");
-      System.out.println("parts: " + Arrays.toString(parts));
-      
-      String path = parts[1];
-      System.out.println("path: " + path);
+            // Read the request line
+            String requestLine = reader.readLine();
+            System.out.println("Request Line: " + requestLine);
 
-      String userAgent = header.getOrDefault("User-Agent", null);
-      // int userAgentIndex = 0;
-      // while (! parts[userAgentIndex].equals("User-Agent:")){
-      //   userAgentIndex++;
-      // }
-      // userAgent = parts[userAgentIndex + 1];
+            HashMap<String, String> headers = new HashMap<>();
+            String read;
+            while ((read = reader.readLine()) != null && !read.isEmpty()) {
+                String[] arr = read.split(": ");
+                if (arr.length == 2) {
+                    headers.put(arr[0], arr[1]);
+                }
+            }
 
-      
-      
-      
-      String[] pathArr = path.split("/");
-      System.out.println("pathArr " + Arrays.toString(pathArr));
+            // Parse request line parts
+            String[] parts = requestLine.split(" ");
+            String path = parts.length > 1 ? parts[1] : "/";
+            System.out.println("Path: " + path);
 
+            // Parse User-Agent if present
+            String userAgent = headers.get("User-Agent");
 
-        if(pathArr.length > 1){
-          if(pathArr[1].equals("echo")){
-            
-            String cont = pathArr[2];
-            System.out.println("cont: " + cont);
-            String pathsize = Integer.toString(cont.length());
-            
-            response = "HTTP/1.1 200 OK\r\n" +
-            "Content-Type: text/plain\r\n" +
-            "Content-Length: " + pathsize + "\r\n\r\n" +
-            cont + "\r\n";
+            // Handle the response based on path
+            String[] pathArr = path.split("/");
+            if (pathArr.length > 1 && "echo".equals(pathArr[1])) {
+                String content = pathArr.length > 2 ? pathArr[2] : "";
+                response = "HTTP/1.1 200 OK\r\n" +
+                        "Content-Type: text/plain\r\n" +
+                        "Content-Length: " + content.length() + "\r\n\r\n" +
+                        content;
+            } else if (userAgent != null) {
+                response = "HTTP/1.1 200 OK\r\n" +
+                        "Content-Type: text/plain\r\n" +
+                        "Content-Length: " + userAgent.length() + "\r\n\r\n" +
+                        userAgent;
+            } else {
+                response = "HTTP/1.1 404 Not Found\r\n\r\n";
+            }
 
-          }
-          else{
-            response = "HTTP/1.1 404 Not Found\r\n\r\n";
-          }
-        }else{
-          response = "HTTP/1.1 200 OK\r\n\r\n";
+            System.out.println("Response: " + response);
+
+            // Send response
+            OutputStream out = clientSocket.getOutputStream();
+            out.write(response.getBytes());
+            out.flush();
+
+        } catch (IOException e) {
+            System.out.println("IOException: " + e.getMessage());
+        } finally {
+            // Close resources
+            try {
+                if (clientSocket != null) clientSocket.close();
+                if (serverSocket != null) serverSocket.close();
+            } catch (IOException e) {
+                System.out.println("IOException on closing: " + e.getMessage());
+            }
         }
-
-        if(userAgent != null){
-          response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " 
-          + userAgent.length() + "\r\n\r\n" +
-          userAgent + "\r\n";
-        }else{
-          response = "HTTP/1.1 404 Not Found\r\n\r\n";
-        }
-
-
-
-
-
-
-        
-
-    } catch (IOException e) {
-      System.out.println("IOException: " + e.getMessage());
-    }finally{
-      System.out.println("res: " + response);
-      try{
-        clientSocket.getOutputStream().write(response.getBytes());
-        serverSocket.close();
-        clientSocket.close();
-      }catch (IOException e) {
-          System.out.println("IOException: " + e.getMessage());
     }
-  }
-}
 }
