@@ -75,16 +75,15 @@ class ConnectionHandler implements Runnable {
                 try{
                   File file = new File("/tmp/data/codecrafters.io/http-server-tester/" + path.substring(7));
                   FileWriter myWriter = new FileWriter(file);
-
+                  System.out.println("Body: "+body);
                   myWriter.write(body);
                   myWriter.close();
                   file.createNewFile();
-                    
+                  System.out.println("File: " + file.getAbsolutePath());
                   response = "HTTP/1.1 201 Created\r\n\r\n";
                   }catch(Exception e){
-                    System.out.println("File not found");
+                    System.out.println("File not created");
                     response = "HTTP/1.1 404 Not Found\r\n\r\n";
-                    e.printStackTrace();
                   }
               }
             }else{
