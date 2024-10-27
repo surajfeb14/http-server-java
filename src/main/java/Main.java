@@ -60,7 +60,8 @@ class ConnectionHandler implements Runnable {
                     headers.put(arr[0], arr[1]);
                 }
             }
-            body = reader.readLine();
+            
+
 
             // Parse request line parts
             String[] parts = requestLine.split(" ");
@@ -77,6 +78,8 @@ class ConnectionHandler implements Runnable {
                 try{
                   File file = new File("/tmp/data/codecrafters.io/http-server-tester/" + path.substring(7));
                   FileWriter myWriter = new FileWriter(file);
+                  body = reader.readLine();
+                  reader.close();
                   System.out.println("Body: " + body);
                   myWriter.write(body);
                   myWriter.close();
